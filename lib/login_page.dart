@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_frontend_app/app_logo.dart';
+import 'package:todo_frontend_app/config.dart';
+import 'package:todo_frontend_app/dashboard_page.dart';
 import 'package:todo_frontend_app/register_page.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,61 +17,42 @@ class _LogInPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isNotValidate = false;
-  // late SharedPreferences prefs;
+  late SharedPreferences prefs;
 
   @override
-  // void initState() {
-  //   super.initState();
-  //   initSharedPref();
-  // }
+  void initState() {
+    super.initState();
+    initSharedPref();
+  }
 
-  // void initSharedPref() async {
-  //   prefs = await SharedPreferences.getInstance();
-  // }
+  void initSharedPref() async {
+    prefs = await SharedPreferences.getInstance();
+  }
 
-  // void loginUser() async {
-  //   if (emailController.text.isNotEmpty &&
-  //       passwordController.text.isNotEmpty) {
-  //     var reqBody = {
-  //       "email": emailController.text,
-  //       "password": passwordController.text,
-  //     };
-
-  //     var response = await http.post(
-  //       Uri.parse(login), // Replace `login` with your actual endpoint URL
-  //       headers: {"Content-Type": "application/json"},
-  //       body: jsonEncode(reqBody),
-  //     );
-
-  //     var jsonResponse = jsonDecode(response.body);
-  //     if (jsonResponse['status'] == true) {
-  //       var myToken = jsonResponse['token'];
-  //       prefs.setString('token', myToken);
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(builder: (context) => Dashboard(token: myToken)),
-  //       );
-  //     } else {
-  //       print('Something went wrong');
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text("Login failed! Please try again."),
-  //           backgroundColor: Colors.red,
-  //         ),
-  //       );
-  //     }
-  //   } else {
-  //     setState(() {
-  //       _isNotValidate = true;
-  //     });
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text("Please fill in all fields."),
-  //         backgroundColor: Colors.orange,
-  //       ),
-  //     );
-  //   }
-  // }
+  void loginUser() async {
+    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+      var regBody = {
+        "email": emailController.text,
+        "password": passwordController.text,
+      };
+      var response = await http.post(
+        Uri.parse(login),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(regBody),
+      );
+      var jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['status'] == true) {
+        var myToken = jsonResponse['token'];
+        prefs.setString('token', myToken);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardPage(token: myToken)),
+        );
+      } else {
+        print("Something went wrong");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +97,7 @@ class _LogInPageState extends State<LoginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Email",
-                        errorText:
-                            _isNotValidate ? "Enter Proper Info" : null,
+                        errorText: _isNotValidate ? "Enter Proper Info" : null,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -129,8 +115,7 @@ class _LogInPageState extends State<LoginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Password",
-                        errorText:
-                            _isNotValidate ? "Enter Proper Info" : null,
+                        errorText: _isNotValidate ? "Enter Proper Info" : null,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -140,7 +125,7 @@ class _LogInPageState extends State<LoginPage> {
                   SizedBox(height: 24), // Adjust spacing
                   GestureDetector(
                     onTap: () {
-                      // loginUser();
+                      loginUser();
                     },
                     child: Container(
                       padding: EdgeInsets.all(16),
